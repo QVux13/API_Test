@@ -12,10 +12,15 @@ app = FastAPI(
     title="Task Management API",
     description="API for managing tasks and users",
     version="1.0.0",
-
     docs_url="/api/docs",
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json",
+
+    swagger_ui_init_oauth={
+        "usePkceWithAuthorizationCodeGrant": False,
+        "clientId": None,
+        "clientSecret": None,
+    }
 )
 
 # CORS
@@ -27,25 +32,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Exception handler
+# Exception handlers
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
         status_code=exc.status_code,
-        content={
-            "detail": exc.detail,
-            "status_code": exc.status_code
-        }
+        content={"detail": exc.detail, "status_code": exc.status_code}
     )
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=500,
-        content={
-            "detail": "Internal server error",
-            "message": str(exc)
-        }
+        content={"detail": "Internal server error", "message": str(exc)}
     )
 
 # Include routers
@@ -64,7 +63,4 @@ def root():
 
 @app.get("/health")
 def health_check():
-    return {
-        "status": "healthy",
-        "database": "connected"
-    }
+    return {"status": "healthy", "database": "connected"}
